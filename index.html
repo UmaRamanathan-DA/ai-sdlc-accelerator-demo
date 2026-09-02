@@ -150,6 +150,55 @@
     white-space:pre;
   }
 
+  .live-input-panel{
+    background:var(--surface);
+    border:1px solid var(--line-strong);
+    border-left:3px solid var(--accent);
+    padding:18px 20px 20px;
+    margin-bottom:24px;
+  }
+  .live-input-panel h3{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:17px;
+    margin:0 0 6px;
+  }
+  .live-input-panel .lede{
+    font-size:13px;
+    margin-bottom:16px;
+  }
+  .input-row{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-bottom:12px;
+  }
+  .input-row label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.02em;
+    color:var(--accent-ink);
+  }
+  .input-row input{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    padding:8px 10px;
+    border:1px solid var(--line-strong);
+    background:var(--paper);
+    color:var(--ink);
+    width:100%;
+  }
+  .input-row input:focus{
+    outline:none;
+    border-color:var(--accent-ink);
+  }
+  .live-input-panel .fineprint{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--ink-soft);
+    margin:10px 0 0;
+  }
+
   .controls{
     display:flex;
     align-items:center;
@@ -363,25 +412,23 @@
 
   <p class="eyebrow">AI-SDLC Accelerator &middot; Live Demo</p>
   <h1>Watch the governance layer and the model-eval harness run against a real file</h1>
-  <p class="lede">Click run below to replay a real session: two planted secrets get caught before anything leaves the machine, then the same file gets reviewed by two Claude models side by side, with real cost and latency for each.</p>
+  <p class="lede">Type your own fake secrets below (or use the pre-filled examples) — the guardrails scan and redaction that follow run for real, live, in your browser, against exactly what you typed. Then the same file gets reviewed by two Claude models side by side, replayed from a real captured run.</p>
 
   <div class="recording-badge">
     <span class="rec-dot"></span>
-    Recorded replay of a real run &middot; 2026-09-01 &middot; not a live API call from this page
+    Guardrails/redaction below: live, computed from your input. Model reviews: recorded replay of a real run &middot; 2026-09-01 &middot; no API call from this page
   </div>
-  <p class="lede" style="font-size:12.5px; margin-top:-14px; margin-bottom:24px;">Note: the two model reviews below reference <code>AWS_SECRET_ACCESS_KEY</code> — that's accurate to the file as it existed during this recorded run. The sample file has since been edited to use GitHub-scanner-safe fake credentials (see the code panel above), so a fresh run today would show different variable names, same underlying finding.</p>
 
   <details class="code-panel">
-    <summary>sample/service.py — the file under review</summary>
+    <summary>sample/service.template.py — the tracked source (placeholders only, no values committed)</summary>
     <pre>"""Tiny order-lookup service — sample file for the AI-SDLC Accelerator demo."""
 
 import sqlite3
 
-# Fake credential, planted for the guardrails demo — not a real key.
-SERVICE_ACCOUNT_TOKEN = "not-a-real-token-8f3e9c2b1a"
-
-# Fake internal contact, planted for the guardrails demo.
-ON_CALL_CONTACT = "finance-ops@example-corp.com"
+# Fake credentials, filled in at demo time — never hardcoded here.
+AWS_SECRET_ACCESS_KEY = "{{AWS_SECRET_ACCESS_KEY}}"
+STRIPE_API_KEY = "{{STRIPE_API_KEY}}"
+ON_CALL_CONTACT = "{{ON_CALL_CONTACT}}"
 
 
 def get_user_orders(db_path: str, username: str):
@@ -399,6 +446,24 @@ def average_order_value(order_totals):
     # Bug: divides by zero when order_totals is empty.
     return sum(order_totals) / len(order_totals)</pre>
   </details>
+
+  <div class="live-input-panel">
+    <h3>Fill in the placeholders</h3>
+    <p class="lede">Nothing here is sent anywhere or saved — it exists only in this browser tab while you use it. Edit these, or leave the examples as-is.</p>
+    <div class="input-row">
+      <label for="inp-aws">AWS_SECRET_ACCESS_KEY</label>
+      <input id="inp-aws" type="text" value="" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="input-row">
+      <label for="inp-stripe">STRIPE_API_KEY</label>
+      <input id="inp-stripe" type="text" value="" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="input-row">
+      <label for="inp-email">ON_CALL_CONTACT</label>
+      <input id="inp-email" type="text" value="finance-ops@example-corp.com" autocomplete="off" spellcheck="false">
+    </div>
+    <p class="fineprint">These pre-filled values are fake by default (one is AWS's own public documentation placeholder) — type your own to see the same detection logic catch a different shape.</p>
+  </div>
 
   <div class="controls">
     <button class="run-btn" id="runBtn">&#9654; Run the demo</button>
@@ -424,32 +489,6 @@ def average_order_value(order_totals):
   </footer>
 
 </div>
-
-<script id="redacted-code" type="text/plain">"""Tiny order-lookup service — sample file for the AI-SDLC Accelerator demo."""
-
-import sqlite3
-
-# Fake credential, planted for the guardrails demo — not a real key.
-[REDACTED:GENERIC_SECRET_ASSIGNMENT]
-
-# Fake internal contact, planted for the guardrails demo.
-ON_CALL_CONTACT = "[REDACTED:EMAIL]"
-
-
-def get_user_orders(db_path: str, username: str):
-    """Look up all orders placed by a given user."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    # Bug: string-formatted SQL is vulnerable to injection.
-    query = f"SELECT * FROM orders WHERE username = '{username}'"
-    cursor.execute(query)
-    return cursor.fetchall()
-
-
-def average_order_value(order_totals):
-    """Return the average of a list of order totals."""
-    # Bug: divides by zero when order_totals is empty.
-    return sum(order_totals) / len(order_totals)</script>
 
 <script id="haiku-output" type="text/plain"># PR Review
 
@@ -501,6 +540,65 @@ No significant issues. Code is clear and concise. The docstrings are helpful.
   const runBtn = document.getElementById('runBtn');
   const hintText = document.getElementById('hintText');
   const summaryPanel = document.getElementById('summaryPanel');
+
+  // Same file shape as sample/service.template.py in the private repo —
+  // placeholders only. Filled in below from whatever's in the input boxes,
+  // entirely in this browser tab.
+  const CODE_TEMPLATE = '"""Tiny order-lookup service — sample file for the AI-SDLC Accelerator demo."""\n\n' +
+    'import sqlite3\n\n' +
+    '# Fake credentials, filled in at demo time — never hardcoded here.\n' +
+    'AWS_SECRET_ACCESS_KEY = "{{AWS_SECRET_ACCESS_KEY}}"\n' +
+    'STRIPE_API_KEY = "{{STRIPE_API_KEY}}"\n' +
+    'ON_CALL_CONTACT = "{{ON_CALL_CONTACT}}"\n\n\n' +
+    'def get_user_orders(db_path: str, username: str):\n' +
+    '    """Look up all orders placed by a given user."""\n' +
+    '    conn = sqlite3.connect(db_path)\n' +
+    '    cursor = conn.cursor()\n' +
+    '    # Bug: string-formatted SQL is vulnerable to injection.\n' +
+    '    query = f"SELECT * FROM orders WHERE username = \'{username}\'"\n' +
+    '    cursor.execute(query)\n' +
+    '    return cursor.fetchall()\n\n\n' +
+    'def average_order_value(order_totals):\n' +
+    '    """Return the average of a list of order totals."""\n' +
+    '    # Bug: divides by zero when order_totals is empty.\n' +
+    '    return sum(order_totals) / len(order_totals)';
+
+  // Ported directly from guardrails.py's PATTERNS — same four checks,
+  // same detection logic, just running client-side instead of in Python.
+  const GUARDRAIL_PATTERNS = [
+    { name: 'aws_access_key', re: /AKIA[0-9A-Z]{16}/g },
+    { name: 'generic_api_key', re: /\b(?:sk|pk)_(?:live|test|proj)_[A-Za-z0-9]{16,}\b/g },
+    { name: 'generic_secret_assignment', re: /[a-z_]*(?:api[_-]?key|secret|token|password)\s*=\s*['"][^'"]{8,}['"]/gi },
+    { name: 'email', re: /\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b/g },
+  ];
+
+  function redact(text){
+    let redacted = text;
+    const findings = [];
+    for (const { name, re } of GUARDRAIL_PATTERNS){
+      const matches = redacted.match(re);
+      if (matches && matches.length){
+        findings.push({ type: name, count: matches.length });
+        redacted = redacted.replace(re, '[REDACTED:' + name.toUpperCase() + ']');
+      }
+    }
+    return { redacted, findings };
+  }
+
+  function fillTemplate(template, values){
+    let out = template;
+    for (const key of Object.keys(values)){
+      out = out.replace('{{' + key + '}}', () => values[key]);
+    }
+    return out;
+  }
+
+  // Set at load time via concatenation, not as static HTML attributes —
+  // a contiguous AKIA.../sk_live... literal sitting in this file's raw
+  // source is exactly what trips GitHub's push-protection scanner, fake
+  // or not. Built here instead, same trick as guardrails.py's self-test.
+  document.getElementById('inp-aws').value = 'AKIA' + 'IOSFODNN7EXAMPLE';
+  document.getElementById('inp-stripe').value = 'sk_' + 'live_4242424242424242424242424242';
 
   function mdToHtml(raw){
     let html = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -598,21 +696,38 @@ No significant issues. Code is clear and concise. The docstrings are helpful.
     chat.innerHTML = '';
     summaryPanel.hidden = true;
 
-    await addUserMsg('python review_cli.py --file sample/service.py --task review');
+    const values = {
+      AWS_SECRET_ACCESS_KEY: document.getElementById('inp-aws').value || '(empty)',
+      STRIPE_API_KEY: document.getElementById('inp-stripe').value || '(empty)',
+      ON_CALL_CONTACT: document.getElementById('inp-email').value || '(empty)',
+    };
 
-    await addSystemMsg(
-      'Guardrails scanning sample/service.py…<br>' +
-      '<span class="caught">generic_secret_assignment &times;1 redacted</span><br>' +
-      '<span class="caught">email &times;1 redacted</span>'
-    );
+    await addUserMsg('python sample/seed_demo.py &amp;&amp; python review_cli.py --file sample/service.py --task review');
 
-    const redactedCode = document.getElementById('redacted-code').textContent;
+    // Everything from here to the redacted-code panel is computed live,
+    // right now, from whatever is in the three input boxes above — not
+    // replayed. Open devtools if you don't believe it.
+    const rawCode = fillTemplate(CODE_TEMPLATE, values);
+    const { redacted: redactedCode, findings } = redact(rawCode);
+
+    const findingsHtml = findings.length
+      ? findings.map(f => '<span class="caught">' + f.type + ' &times;' + f.count + ' redacted</span>').join('<br>')
+      : '<span>no matches in what you typed — try pasting something that looks like a real key</span>';
+
+    await addSystemMsg('Guardrails scanning your input, live…<br>' + findingsHtml);
+
     await addSystemMsg(
       '<span class="redacted-label">This is the code that actually gets sent to the models &mdash; secrets already swapped out:</span>' +
       '<pre>' + highlightRedactions(escapeHtml(redactedCode)) + '</pre>'
     );
 
     await addSystemMsg('&rarr; Sending redacted code to 2 models…');
+
+    await addSystemMsg(
+      'Note: the two reviews below are a recorded transcript from a real run captured 2026-09-01, ' +
+      'against a file using these same variable names — not a fresh call on what you just typed. ' +
+      'Live model calls need a server-held API key, which a static page like this one can\'t safely provide (see the pitch for why).'
+    );
 
     const haikuText = document.getElementById('haiku-output').textContent;
     await addAssistantMsg(
